@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import Login from './Login'
 import api from './config/api'
+import { FaEdit, FaTrash } from 'react-icons/fa'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function App() {
   const [alunos, setAlunos] = useState([])
@@ -19,6 +22,11 @@ function App() {
   
   // Estado para filtro por classe
   const [classeSelecionada, setClasseSelecionada] = useState(null)
+  
+  // Estados para modal de confirmação de exclusão
+  const [modalDeleteAberto, setModalDeleteAberto] = useState(false)
+  const [alunoDeletando, setAlunoDeletando] = useState(null)
+  const [deletando, setDeletando] = useState(false)
   
   // Estados de autenticação
   const [autenticado, setAutenticado] = useState(false)
@@ -72,7 +80,7 @@ function App() {
         data_nascimento: dataNascimento
       })
       
-      alert('Aluno cadastrado com sucesso!')
+      toast.success('Aluno cadastrado com sucesso!')
       setNome('')
       setDataNascimento('')
       carregarDados()
@@ -80,7 +88,7 @@ function App() {
       if (error.response?.status === 401) {
         handleLogout()
       } else {
-        alert(`Erro: ${error.response?.data?.erro || 'Erro ao cadastrar aluno'}`)
+        toast.error(`Erro: ${error.response?.data?.erro || 'Erro ao cadastrar aluno'}`)
       }
     }
   }
@@ -89,13 +97,13 @@ function App() {
     try {
       const response = await api.put('/alunos/revalidar-classes')
       
-      alert(`Revalidação concluída! ${response.data.resultado.atualizados} aluno(s) atualizado(s)`)
+      toast.success(`Revalidação concluída! ${response.data.resultado.atualizados} aluno(s) atualizado(s)`)
       carregarDados()
     } catch (error) {
       if (error.response?.status === 401) {
         handleLogout()
       } else {
-        alert('Erro ao revalidar classes')
+        toast.error('Erro ao revalidar classes')
       }
     }
   }
@@ -126,38 +134,47 @@ function App() {
         data_nascimento: dataNascimentoEdicao
       })
       
-      alert('Aluno atualizado com sucesso!')
+      toast.success('Aluno atualizado com sucesso!')
       fecharModal()
       carregarDados()
     } catch (error) {
       if (error.response?.status === 401) {
         handleLogout()
       } else {
-        alert(`Erro: ${error.response?.data?.erro || 'Erro ao editar aluno'}`)
+        toast.error(`Erro: ${error.response?.data?.erro || 'Erro ao editar aluno'}`)
       }
     } finally {
       setSalvando(false)
     }
   }
 
-  const deletarAluno = async (aluno) => {
-    const confirmacao = window.confirm(
-      `Tem certeza que deseja deletar o aluno ${aluno.nome}?\n\nEsta ação não pode ser desfeita.`
-    )
-    
-    if (!confirmacao) return
+  const abrirModalDelete = (aluno) => {
+    setAlunoDeletando(aluno)
+    setModalDeleteAberto(true)
+  }
+
+  const fecharModalDelete = () => {
+    setModalDeleteAberto(false)
+    setAlunoDeletando(null)
+  }
+
+  const confirmarDelete = async () => {
+    setDeletando(true)
     
     try {
-      await api.delete(`/alunos/${aluno.id}`)
+      await api.delete(`/alunos/${alunoDeletando.id}`)
       
-      alert('Aluno deletado com sucesso!')
+      toast.success('Aluno deletado com sucesso!')
+      fecharModalDelete()
       carregarDados()
     } catch (error) {
       if (error.response?.status === 401) {
         handleLogout()
       } else {
-        alert(`Erro: ${error.response?.data?.erro || 'Erro ao deletar aluno'}`)
+        toast.error(`Erro: ${error.response?.data?.erro || 'Erro ao deletar aluno'}`)
       }
+    } finally {
+      setDeletando(false)
     }
   }
 
@@ -206,7 +223,7 @@ function App() {
       <header>
         <div className="header-content">
           <div>
-            <h1>📚 Gerenciamento de Alunos Casa de Oração</h1>
+            <h1>Gerenciamento de Alunos Casa de Oração</h1>
             <p>Organização por Classes</p>
           </div>
           <div className="user-info">
@@ -320,7 +337,7 @@ function App() {
                 <thead>
                   <tr>
                     <th>Nome</th>
-                    <th>Data Nascimento</th>
+                    <th className="data-nascimento-col">Data Nascimento</th>
                     <th>Idade</th>
                     <th>Classe</th>
                     <th>Ações</th>
@@ -337,7 +354,7 @@ function App() {
                     return (
                       <tr key={aluno.id}>
                         <td>{aluno.nome || 'N/A'}</td>
-                        <td>{dataFormatada}</td>
+                        <td className="data-nascimento-col">{dataFormatada}</td>
                         <td>{aluno.idade !== undefined ? `${aluno.idade} anos` : 'N/A'}</td>
                         <td>
                           <span className="classe-badge">
@@ -351,14 +368,14 @@ function App() {
                               className="btn-action btn-edit"
                               title="Editar aluno"
                             >
-                              ✏️
+                              <FaEdit />
                             </button>
                             <button 
-                              onClick={() => deletarAluno(aluno)}
+                              onClick={() => abrirModalDelete(aluno)}
                               className="btn-action btn-delete"
                               title="Deletar aluno"
                             >
-                              🗑️
+                              <FaTrash />
                             </button> 
                           </div>
                         </td>
@@ -416,6 +433,61 @@ function App() {
           </div>
         </div>
       )}
+      
+      {/* Modal de Confirmação de Exclusão */}
+      {modalDeleteAberto && (
+        <div className="modal-overlay" onClick={fecharModalDelete}>
+          <div className="modal-content modal-delete" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Confirmar Exclusão</h2>
+            </div>
+            
+            <div className="modal-body">
+              <p className="delete-warning">
+                Tem certeza que deseja deletar o aluno:
+              </p>
+              <p className="delete-student-name">
+                <strong>{alunoDeletando?.nome}</strong>
+              </p>
+              <p className="delete-info">
+                Esta ação não pode ser desfeita.
+              </p>
+            </div>
+            
+            <div className="modal-actions">
+              <button 
+                type="button" 
+                onClick={fecharModalDelete} 
+                className="btn btn-secondary"
+                disabled={deletando}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="button" 
+                onClick={confirmarDelete} 
+                className="btn btn-danger"
+                disabled={deletando}
+              >
+                {deletando ? 'Deletando...' : 'Sim, Deletar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <ToastContainer 
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   )
 }

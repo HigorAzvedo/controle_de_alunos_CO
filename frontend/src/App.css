@@ -13,7 +13,7 @@ body {
 
 .app {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba219 100%);
   padding-bottom: 2rem;
 }
 
@@ -21,7 +21,7 @@ header {
   background: rgba(255, 255, 255, 0.95);
   padding: 2rem;
   text-align: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .header-content {
@@ -34,7 +34,7 @@ header {
   gap: 1rem;
 }
 
-.header-content > div:first-child {
+.header-content>div:first-child {
   text-align: left;
 }
 
@@ -90,7 +90,7 @@ section {
   padding: 2rem;
   margin-bottom: 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
@@ -184,7 +184,7 @@ h2 {
   padding: 1.5rem;
   border-radius: 8px;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: all 0.3s;
   cursor: pointer;
   position: relative;
@@ -193,7 +193,7 @@ h2 {
 
 .classe-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .classe-card.selected {
@@ -360,10 +360,13 @@ tbody tr:hover {
   padding: 0.5rem 0.75rem;
   border: none;
   border-radius: 6px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.3s;
   background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-edit {
@@ -403,6 +406,7 @@ tbody tr:hover {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -423,6 +427,7 @@ tbody tr:hover {
     transform: translateY(-50px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -480,44 +485,110 @@ tbody tr:hover {
   min-width: 120px;
 }
 
+/* Modal de Confirmação de Exclusão */
+.modal-delete {
+  max-width: 450px;
+}
+
+.modal-delete .modal-header h2 {
+  color: #e74c3c;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.delete-warning {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.delete-student-name {
+  font-size: 1.3rem;
+  color: #333;
+  text-align: center;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  border-radius: 6px;
+}
+
+.delete-info {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+}
+
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .section-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .classes-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
-  
+
   table {
     font-size: 0.9rem;
   }
-  
-  th, td {
+
+  th,
+  td {
     padding: 0.75rem 0.5rem;
   }
-  
+
+  /* Esconder coluna de data de nascimento em telas pequenas */
+  .data-nascimento-col {
+    display: none;
+  }
+
   .action-buttons {
     flex-direction: column;
     gap: 0.3rem;
   }
-  
+
   .btn-action {
     font-size: 1rem;
     padding: 0.4rem 0.6rem;
   }
-  
+
   .modal-content {
     width: 95%;
     padding: 1.5rem;
   }
-  
+
   .modal-actions {
     flex-direction: column;
   }
-  
+
   .modal-actions .btn {
     width: 100%;
   }

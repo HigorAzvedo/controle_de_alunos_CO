@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './Login.css'
 import api from './config/api'
+import { toast } from 'react-toastify'
 
 function Login({ onLoginSuccess }) {
   const [username, setUsername] = useState('')
@@ -19,6 +20,7 @@ function Login({ onLoginSuccess }) {
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('usuario', JSON.stringify(response.data.usuario))
       
+      toast.success(`Bem-vindo, ${response.data.usuario.username}!`)
       onLoginSuccess(response.data.token, response.data.usuario)
     } catch (error) {
       setErro(error.response?.data?.erro || 'Erro de conexão. Verifique se o servidor está rodando.')
@@ -31,7 +33,7 @@ function Login({ onLoginSuccess }) {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <h1>🔐 Sistema de Gerenciamento</h1>
+          <h1>Sistema de Gerenciamento</h1>
           <p>Casa de Oração - Alunos</p>
         </div>
 
