@@ -2,18 +2,10 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const db = require('../config/database')
 
-// Chave secreta para o JWT (em produção, use variável de ambiente)
 const JWT_SECRET = process.env.JWT_SECRET || 'sua-chave-secreta-super-segura-2026'
 
-/**
- * Valida as credenciais do usuário
- * @param {string} username 
- * @param {string} password 
- * @returns {Promise<object|null>} Usuário se credenciais válidas, null caso contrário
- */
 async function validarCredenciais(username, password) {
   try {
-    // Busca o usuário pelo username
     const usuario = await db('usuarios')
       .where({ username })
       .first()
@@ -22,14 +14,12 @@ async function validarCredenciais(username, password) {
       return null
     }
     
-    // Compara a senha fornecida com o hash armazenado
     const senhaValida = await bcrypt.compare(password, usuario.password_hash)
     
     if (!senhaValida) {
       return null
     }
     
-    // Remove a senha do objeto retornado
     const { password_hash, ...usuarioSemSenha } = usuario
     
     return usuarioSemSenha

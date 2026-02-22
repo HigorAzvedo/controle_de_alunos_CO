@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import Login from './Login'
+import api from './config/api'
 
 function App() {
   const [alunos, setAlunos] = useState([])
@@ -26,7 +27,6 @@ function App() {
   const [verificandoAuth, setVerificandoAuth] = useState(true)
 
   useEffect(() => {
-    // Verifica se há token salvo ao carregar a aplicação
     const tokenSalvo = localStorage.getItem('token')
     const usuarioSalvo = localStorage.getItem('usuario')
     
@@ -47,30 +47,17 @@ function App() {
 
   const carregarDados = async () => {
     try {
-      const headers = {
-        'Authorization': `Bearer ${token}`
-      }
-      
       const [alunosRes, classesRes] = await Promise.all([
-        fetch('/api/alunos', { headers }),
-        fetch('/api/classes', { headers })
+        api.get('/alunos'),
+        api.get('/classes')
       ])
       
-      // Verifica se houve erro de autenticação
-      if (alunosRes.status === 401 || classesRes.status === 401) {
-        handleLogout()
-        return
-      }
-      
-      const alunosData = await alunosRes.json()
-      const classesData = await classesRes.json()
-      
-      console.log('Dados recebidos:', alunosData) // Debug
-      
-      setAlunos(alunosData.alunos || [])
-      setClasses(classesData.classes || [])
+      setAlunos(alunosRes.data.alunos || [])
+      setClasses(classesRes.data.classes || [])
     } catch (error) {
-      console.error('Erro ao carregar dados:', error)
+      if (error.response?.status === 401) {
+        handleLogout()
+      }
     } finally {
       setLoading(false)
     }
@@ -80,65 +67,42 @@ function App() {
     e.preventDefault()
     
     try {
-      const response = await fetch('/api/alunos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          nome,
-          data_nascimento: dataNascimento
-        })
+      await api.post('/alunos', {
+        nome,
+        data_nascimento: dataNascimento
       })
       
-      if (response.status === 401) {
-        handleLogout()
-        return
-      }
-      
-      if (response.ok) {
-        alert('Aluno cadastrado com sucesso!')
-        setNome('')
-        setDataNascimento('')
-        carregarDados()
-      } else {
-        const error = await response.json()
-        alert(`Erro: ${error.erro}`)
-      }
+      alert('Aluno cadastrado com sucesso!')
+      setNome('')
+      setDataNascimento('')
+      carregarDados()
     } catch (error) {
-      console.error('Erro ao cadastrar:', error)
-      alert('Erro ao cadastrar aluno')
+      if (error.response?.status === 401) {
+        handleLogout()
+      } else {
+        alert(`Erro: ${error.response?.data?.erro || 'Erro ao cadastrar aluno'}`)
+      }
     }
   }
 
   const revalidarClasses = async () => {
     try {
-      const response = await fetch('/api/alunos/revalidar-classes', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const response = await api.put('/alunos/revalidar-classes')
       
-      if (response.status === 401) {
-        handleLogout()
-        return
-      }
-      
-      const data = await response.json()
-      alert(`Revalidação concluída! ${data.resultado.atualizados} aluno(s) atualizado(s)`)
+      alert(`Revalidação concluída! ${response.data.resultado.atualizados} aluno(s) atualizado(s)`)
       carregarDados()
     } catch (error) {
-      console.error('Erro ao revalidar:', error)
-      alert('Erro ao revalidar classes')
+      if (error.response?.status === 401) {
+        handleLogout()
+      } else {
+        alert('Erro ao revalidar classes')
+      }
     }
   }
 
   const abrirModalEdicao = (aluno) => {
     setAlunoEditando(aluno)
     setNomeEdicao(aluno.nome)
-    // Extrai apenas a data sem timestamp
     const dataFormatada = aluno.data_nascimento.split('T')[0]
     setDataNascimentoEdicao(dataFormatada)
     setModalAberto(true)
@@ -157,34 +121,20 @@ function App() {
     setSalvando(true)
     
     try {
-      const response = await fetch(`/api/alunos/${alunoEditando.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          nome: nomeEdicao,
-          data_nascimento: dataNascimentoEdicao
-        })
+      await api.put(`/alunos/${alunoEditando.id}`, {
+        nome: nomeEdicao,
+        data_nascimento: dataNascimentoEdicao
       })
       
-      if (response.status === 401) {
-        handleLogout()
-        return
-      }
-      
-      if (response.ok) {
-        alert('Aluno atualizado com sucesso!')
-        fecharModal()
-        carregarDados()
-      } else {
-        const error = await response.json()
-        alert(`Erro: ${error.erro}`)
-      }
+      alert('Aluno atualizado com sucesso!')
+      fecharModal()
+      carregarDados()
     } catch (error) {
-      console.error('Erro ao editar aluno:', error)
-      alert('Erro ao editar aluno')
+      if (error.response?.status === 401) {
+        handleLogout()
+      } else {
+        alert(`Erro: ${error.response?.data?.erro || 'Erro ao editar aluno'}`)
+      }
     } finally {
       setSalvando(false)
     }
@@ -198,46 +148,31 @@ function App() {
     if (!confirmacao) return
     
     try {
-      const response = await fetch(`/api/alunos/${aluno.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      await api.delete(`/alunos/${aluno.id}`)
       
-      if (response.status === 401) {
-        handleLogout()
-        return
-      }
-      
-      if (response.ok) {
-        alert('Aluno deletado com sucesso!')
-        carregarDados()
-      } else {
-        const error = await response.json()
-        alert(`Erro: ${error.erro}`)
-      }
+      alert('Aluno deletado com sucesso!')
+      carregarDados()
     } catch (error) {
-      console.error('Erro ao deletar aluno:', error)
-      alert('Erro ao deletar aluno')
+      if (error.response?.status === 401) {
+        handleLogout()
+      } else {
+        alert(`Erro: ${error.response?.data?.erro || 'Erro ao deletar aluno'}`)
+      }
     }
   }
 
   const selecionarClasse = (classe) => {
     if (classeSelecionada?.id === classe.id) {
-      // Se clicar na mesma classe, desmarca
       setClasseSelecionada(null)
     } else {
       setClasseSelecionada(classe)
     }
   }
 
-  // Filtra os alunos baseado na classe selecionada
   const alunosFiltrados = classeSelecionada
     ? alunos.filter(aluno => aluno.classe.id === classeSelecionada.id)
     : alunos
 
-  // Funções de autenticação
   const handleLoginSuccess = (tokenRecebido, usuarioRecebido) => {
     setToken(tokenRecebido)
     setUsuario(usuarioRecebido)
@@ -254,12 +189,10 @@ function App() {
     setClasses([])
   }
 
-  // Mostra tela de carregamento durante verificação de autenticação
   if (verificandoAuth) {
     return <div className="loading">Verificando autenticação...</div>
   }
 
-  // Mostra tela de login se não estiver autenticado
   if (!autenticado) {
     return <Login onLoginSuccess={handleLoginSuccess} />
   }
@@ -327,7 +260,6 @@ function App() {
           </p>
           <div className="classes-grid">
             {classes.map(classe => {
-              // Formata a faixa etária corretamente
               let faixaEtaria;
               if (classe.idade_max === null) {
                 faixaEtaria = `${classe.idade_min}+ anos`;
@@ -396,7 +328,6 @@ function App() {
                 </thead>
                 <tbody>
                   {alunosFiltrados.map(aluno => {
-                    // Corrige problema de timezone na data
                     let dataFormatada = 'Data inválida'
                     if (aluno.data_nascimento) {
                       const dataParts = aluno.data_nascimento.split('T')[0].split('-')
@@ -441,7 +372,6 @@ function App() {
         </section>
       </div>
 
-      {/* Modal de Edição */}
       {modalAberto && (
         <div className="modal-overlay" onClick={fecharModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>

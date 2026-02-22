@@ -1,11 +1,7 @@
 const authService = require('../services/authService')
 
-/**
- * Middleware para verificar autenticação JWT
- */
 function verificarAutenticacao(req, res, next) {
   try {
-    // Obtém o token do header Authorization
     const authHeader = req.headers.authorization
     
     if (!authHeader) {
@@ -14,7 +10,6 @@ function verificarAutenticacao(req, res, next) {
       })
     }
     
-    // Formato esperado: "Bearer <token>"
     const parts = authHeader.split(' ')
     
     if (parts.length !== 2 || parts[0] !== 'Bearer') {
@@ -25,7 +20,6 @@ function verificarAutenticacao(req, res, next) {
     
     const token = parts[1]
     
-    // Verifica o token
     const decoded = authService.verificarToken(token)
     
     if (!decoded) {
@@ -34,13 +28,11 @@ function verificarAutenticacao(req, res, next) {
       })
     }
     
-    // Adiciona os dados do usuário na requisição
     req.usuario = {
       id: decoded.id,
       username: decoded.username
     }
     
-    // Continua para a próxima função
     next()
   } catch (error) {
     console.error('Erro no middleware de autenticação:', error)

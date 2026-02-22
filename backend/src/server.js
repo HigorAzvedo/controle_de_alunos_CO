@@ -6,12 +6,9 @@ const routes = require('./routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Rota de health check
 app.get('/', (req, res) => {
   res.json({
     mensagem: 'API de Gerenciamento de Alunos - Igreja',
@@ -20,17 +17,13 @@ app.get('/', (req, res) => {
   });
 });
 
-// Rotas da API
 app.use('/api', routes);
-
-// Middleware de erro 404
 app.use((req, res) => {
   res.status(404).json({
     erro: 'Rota não encontrada'
   });
 });
 
-// Middleware de erro global
 app.use((err, req, res, next) => {
   console.error('Erro não tratado:', err);
   res.status(500).json({
@@ -39,11 +32,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Inicia o servidor
 app.listen(PORT, () => {
-  console.log(`\n🚀 Servidor rodando na porta ${PORT}`);
-  console.log(`📍 URL: http://localhost:${PORT}`);
-  console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}\n`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`\n🚀 Servidor rodando na porta ${PORT}`);
+    console.log(`📍 URL: http://localhost:${PORT}`);
+    console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}\n`);
+  }
 });
 
 module.exports = app;

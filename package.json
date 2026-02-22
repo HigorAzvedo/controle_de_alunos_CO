@@ -14,9 +14,15 @@
     "backend:migrate": "npm run migrate --workspace=backend",
     "backend:seed": "npm run seed --workspace=backend",
     "backend:start": "npm start --workspace=backend",
-    "install:all": "npm install && npm install --workspace=backend && npm install --workspace=frontend"
+    "install:all": "npm install && npm install --workspace=backend && npm install --workspace=frontend",
+    "start": "node src/server.js"
   },
-  "keywords": ["monorepo", "igreja", "alunos", "classes"],
+  "keywords": [
+    "monorepo",
+    "igreja",
+    "alunos",
+    "classes"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {

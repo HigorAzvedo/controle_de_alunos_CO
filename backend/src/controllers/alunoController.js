@@ -1,21 +1,16 @@
 const db = require('../config/database');
 const alunoService = require('../services/alunoService');
 
-/**
- * Cadastra um novo aluno
- */
 async function cadastrarAluno(req, res) {
   try {
     const { nome, data_nascimento } = req.body;
     
-    // Validações básicas
     if (!nome || !data_nascimento) {
       return res.status(400).json({
         erro: 'Nome e data de nascimento são obrigatórios'
       });
     }
     
-    // Valida formato da data
     const dataRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dataRegex.test(data_nascimento)) {
       return res.status(400).json({
@@ -23,7 +18,6 @@ async function cadastrarAluno(req, res) {
       });
     }
     
-    // Valida se a data não é futura
     const dataNasc = new Date(data_nascimento);
     if (dataNasc > new Date()) {
       return res.status(400).json({
@@ -31,17 +25,14 @@ async function cadastrarAluno(req, res) {
       });
     }
     
-    // Determina a classe baseada na idade
     const { idade, classe } = await alunoService.obterClassePorDataNascimento(data_nascimento);
     
-    // Insere o aluno no banco
     const [id] = await db('alunos').insert({
       nome,
       data_nascimento,
       classe_id: classe.id
     });
     
-    // Busca o aluno cadastrado com informações da classe
     const alunoCadastrado = await db('alunos')
       .select(
         'alunos.id',
@@ -71,9 +62,6 @@ async function cadastrarAluno(req, res) {
   }
 }
 
-/**
- * Lista todos os alunos com suas classes
- */
 async function listarAlunos(req, res) {
   try {
     const alunos = await db('alunos')
@@ -91,9 +79,7 @@ async function listarAlunos(req, res) {
       .join('classes', 'alunos.classe_id', 'classes.id')
       .orderBy('alunos.nome');
     
-    // Calcula a idade de cada aluno
     const alunosComIdade = alunos.map(aluno => {
-      // Formata a data para evitar problemas de timezone
       let dataFormatada = aluno.data_nascimento
       if (aluno.data_nascimento instanceof Date) {
         const ano = aluno.data_nascimento.getFullYear()

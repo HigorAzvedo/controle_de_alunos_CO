@@ -1,10 +1,5 @@
 const db = require('../config/database');
 
-/**
- * Calcula a idade a partir da data de nascimento
- * @param {string} dataNascimento - Data no formato YYYY-MM-DD
- * @returns {number} Idade em anos
- */
 function calcularIdade(dataNascimento) {
   const hoje = new Date();
   const nascimento = new Date(dataNascimento);
@@ -13,7 +8,6 @@ function calcularIdade(dataNascimento) {
   const mesAtual = hoje.getMonth();
   const mesNascimento = nascimento.getMonth();
   
-  // Ajusta se ainda não fez aniversário no ano atual
   if (mesAtual < mesNascimento || 
       (mesAtual === mesNascimento && hoje.getDate() < nascimento.getDate())) {
     idade--;
@@ -22,16 +16,8 @@ function calcularIdade(dataNascimento) {
   return idade;
 }
 
-/**
- * Determina a classe apropriada baseada na idade
- * Regra: idade_min (inclusivo) <= idade < idade_max (exclusivo)
- * @param {number} idade - Idade do aluno
- * @returns {Promise<Object|null>} Objeto da classe ou null se não encontrada
- */
 async function determinarClasse(idade) {
   try {
-    // Busca a classe que corresponde à idade
-    // idade_min <= idade AND (idade_max > idade OR idade_max IS NULL)
     const classe = await db('classes')
       .where('idade_min', '<=', idade)
       .andWhere(function() {
@@ -47,11 +33,6 @@ async function determinarClasse(idade) {
   }
 }
 
-/**
- * Obtém a classe correta para um aluno baseado na data de nascimento
- * @param {string} dataNascimento - Data no formato YYYY-MM-DD
- * @returns {Promise<Object>} Objeto contendo idade e classe
- */
 async function obterClassePorDataNascimento(dataNascimento) {
   const idade = calcularIdade(dataNascimento);
   const classe = await determinarClasse(idade);
@@ -66,13 +47,8 @@ async function obterClassePorDataNascimento(dataNascimento) {
   };
 }
 
-/**
- * Revalida e atualiza as classes de todos os alunos
- * @returns {Promise<Object>} Estatísticas da revalidação
- */
 async function revalidarTodasAsClasses() {
   try {
-    // Busca todos os alunos
     const alunos = await db('alunos').select('id', 'data_nascimento', 'classe_id');
     
     let atualizados = 0;
