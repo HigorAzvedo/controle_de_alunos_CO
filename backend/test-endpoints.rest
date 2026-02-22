@@ -1,0 +1,101 @@
+### API de Gerenciamento de Alunos - Testes
+### Use a extensão REST Client no VS Code ou copie os comandos curl abaixo
+
+### 1. Health Check - Verificar se API está rodando
+GET http://localhost:3000/
+
+###
+
+### 2. Listar todas as classes disponíveis
+GET http://localhost:3000/api/classes
+
+###
+
+### 3. Cadastrar aluno - Criança (classe Moisés - 0 a 3 anos)
+POST http://localhost:3000/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "Maria Silva",
+  "data_nascimento": "2023-05-15"
+}
+
+###
+
+### 4. Cadastrar aluno - Adolescente (classe Daniel - 13 a 18 anos)
+POST http://localhost:3000/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "João Pedro",
+  "data_nascimento": "2010-08-20"
+}
+
+###
+
+### 5. Cadastrar aluno - Adulto jovem (classe Embaixadores - 18 a 30 anos)
+POST http://localhost:3000/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "Ana Carolina",
+  "data_nascimento": "2000-03-10"
+}
+
+###
+
+### 6. Cadastrar aluno - Adulto (classe Arautos - 30+ anos)
+POST http://localhost:3000/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "Carlos Eduardo",
+  "data_nascimento": "1985-12-01"
+}
+
+###
+
+### 7. Listar todos os alunos cadastrados
+GET http://localhost:3000/api/alunos
+
+###
+
+### 8. Revalidar classes de todos os alunos
+PUT http://localhost:3000/api/alunos/revalidar-classes
+
+###
+
+### 9. Atualizar aluno (alterar nome e/ou data de nascimento)
+PUT http://localhost:3000/api/alunos/1
+Content-Type: application/json
+
+{
+  "nome": "Maria Silva Souza",
+  "data_nascimento": "2023-05-15"
+}
+
+###
+
+### 10. Deletar aluno
+DELETE http://localhost:3000/api/alunos/1
+
+###
+
+### 11. Teste de validação - Data futura (deve dar erro)
+POST http://localhost:3000/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "Teste Futuro",
+  "data_nascimento": "2030-01-01"
+}
+
+###
+
+### 12. Teste de validação - Campos faltando (deve dar erro)
+POST http://localhost:3000/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "Teste Incompleto"
+}

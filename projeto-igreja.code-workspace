@@ -1,0 +1,22 @@
+{
+  "folders": [
+    {
+      "name": "🔹 Root",
+      "path": "."
+    },
+    {
+      "name": "⚙️ Backend",
+      "path": "backend"
+    },
+    {
+      "name": "🎨 Frontend",
+      "path": "frontend"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.git": true
+    }
+  }
+}
