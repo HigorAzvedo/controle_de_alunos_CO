@@ -92,11 +92,6 @@ function Login({ onLoginSuccess }) {
             {carregando ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
-
-        <div className="login-footer">
-          <p>Usuário padrão: <strong>admin</strong></p>
-          <p>Senha padrão: <strong>admin123</strong></p>
-        </div>
       </div>
     </div>
   )
