@@ -9,7 +9,8 @@
     "dev": "nodemon src/server.js",
     "migrate": "knex migrate:latest",
     "migrate:rollback": "knex migrate:rollback",
-    "seed": "knex seed:run"
+    "seed": "knex seed:run",
+    "import:alunos:lote": "node scripts/importarAlunosLote.js"
   },
   "keywords": [
     "igreja",
