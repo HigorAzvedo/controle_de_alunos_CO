@@ -27,11 +27,18 @@ async function cadastrarAluno(req, res) {
     
     const { idade, classe } = await alunoService.obterClassePorDataNascimento(data_nascimento);
     
-    const [id] = await db('alunos').insert({
-      nome,
-      data_nascimento,
-      classe_id: classe.id
-    });
+    const resultadoInsert = await db('alunos')
+      .insert({
+        nome,
+        data_nascimento,
+        classe_id: classe.id
+      })
+      .returning('id');
+
+    const primeiroResultado = resultadoInsert[0];
+    const id = typeof primeiroResultado === 'object'
+      ? primeiroResultado.id
+      : primeiroResultado;
     
     const alunoCadastrado = await db('alunos')
       .select(
