@@ -1,3 +1,13 @@
+/* Forçar cor branca nos inputs em qualquer dispositivo/tema */
+input[type="text"],
+input[type="password"],
+input[type="date"],
+input[type="email"] {
+  background-color: white !important;
+  color: #333 !important;
+  -webkit-text-fill-color: #333 !important;
+}
+
 .login-container {
   min-height: 100vh;
   display: flex;
@@ -88,6 +98,11 @@
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.3s;
+  background-color: white;
+  color: #333;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .login-form input:focus {

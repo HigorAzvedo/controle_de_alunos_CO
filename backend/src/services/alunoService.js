@@ -49,7 +49,7 @@ async function obterClassePorDataNascimento(dataNascimento) {
 
 async function revalidarTodasAsClasses() {
   try {
-    const alunos = await db('alunos').select('id', 'data_nascimento', 'classe_id');
+    const alunos = await db('alunos').select('id', 'nome', 'data_nascimento', 'classe_id');
     
     let atualizados = 0;
     let erros = 0;
@@ -69,7 +69,6 @@ async function revalidarTodasAsClasses() {
           continue;
         }
         
-        // Atualiza apenas se a classe mudou
         if (aluno.classe_id !== classeCorreta.id) {
           await db('alunos')
             .where('id', aluno.id)
@@ -81,6 +80,7 @@ async function revalidarTodasAsClasses() {
           atualizados++;
           detalhes.push({
             aluno_id: aluno.id,
+            aluno_nome: aluno.nome,
             classe_anterior: aluno.classe_id,
             classe_nova: classeCorreta.id,
             idade

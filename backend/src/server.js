@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const routes = require('./routes');
+const { runMigrations } = require('./config/migrate');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,12 +33,24 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  if (process.env.NODE_ENV !== 'production') {
-    console.log(`\n🚀 Servidor rodando na porta ${PORT}`);
-    console.log(`📍 URL: http://localhost:${PORT}`);
-    console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}\n`);
+// Executar migrations antes de iniciar o servidor
+async function startServer() {
+  try {
+    await runMigrations();
+    
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor rodando na porta ${PORT}`);
+      console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`📍 URL: http://localhost:${PORT}\n`);
+      }
+    });
+  } catch (error) {
+    console.error('Falha ao iniciar servidor:', error);
+    process.exit(1);
   }
-});
+}
+
+startServer();
 
 module.exports = app;

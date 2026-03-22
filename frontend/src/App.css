@@ -4,6 +4,16 @@
   box-sizing: border-box;
 }
 
+/* Forçar cor branca nos inputs em qualquer dispositivo/tema */
+input[type="text"],
+input[type="password"],
+input[type="date"],
+input[type="email"] {
+  background-color: white !important;
+  color: #333 !important;
+  -webkit-text-fill-color: #333 !important;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -13,7 +23,7 @@ body {
 
 .app {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba219 100%);
+  background: #f0f2f5;
   padding-bottom: 2rem;
 }
 
@@ -119,6 +129,11 @@ h2 {
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s;
+  background-color: white;
+  color: #333;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .form-group input:focus {
@@ -545,6 +560,108 @@ tbody tr:hover {
   cursor: not-allowed;
 }
 
+/* Modal de Revalidação */
+.modal-revalidacao {
+  max-width: 600px;
+}
+
+.modal-revalidacao .modal-header h2 {
+  color: #27ae60;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.revalidacao-summary {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #27ae60;
+}
+
+.revalidacao-summary p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.text-error {
+  color: #e74c3c !important;
+}
+
+.mudancas-title {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.mudancas-lista {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.mudanca-item {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: all 0.3s;
+}
+
+.mudanca-item:hover {
+  border-color: #7ab8d4;
+  box-shadow: 0 2px 8px rgba(122, 184, 212, 0.2);
+}
+
+.mudanca-nome {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.05rem;
+  color: #000000df;
+}
+
+.mudanca-idade {
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: normal;
+}
+
+.mudanca-classes {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.classe-antiga {
+  background: #e74c3c;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.mudanca-seta {
+  color: #666;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.classe-nova {
+  background: #27ae60;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
 @media (max-width: 768px) {
   .section-header {
     flex-direction: column;
@@ -591,5 +708,23 @@ tbody tr:hover {
 
   .modal-actions .btn {
     width: 100%;
+  }
+  
+  .modal-revalidacao {
+    max-width: 95%;
+  }
+  
+  .mudancas-lista {
+    max-height: 300px;
+  }
+  
+  .mudanca-classes {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .mudanca-seta {
+    transform: rotate(90deg);
   }
 }

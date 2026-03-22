@@ -2,14 +2,13 @@ require('dotenv').config();
 
 module.exports = {
   development: {
-    client: 'mysql2',
-    connection: {
+    client: 'pg',
+    connection: process.env.DATABASE_URL || {
       host: process.env.DB_HOST || 'localhost',
-      port: process.env.DB_PORT || 3306,
-      user: process.env.DB_USER || 'root',
+      port: process.env.DB_PORT || 5432,
+      user: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'igreja_alunos',
-      charset: 'utf8mb4'
+      database: process.env.DB_NAME || 'igreja_alunos'
     },
     migrations: {
       directory: './database/migrations',
@@ -25,15 +24,8 @@ module.exports = {
   },
 
   production: {
-    client: 'mysql2',
-    connection: {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      charset: 'utf8mb4'
-    },
+    client: 'pg',
+    connection: process.env.DATABASE_URL,
     migrations: {
       directory: './database/migrations',
       tableName: 'knex_migrations'

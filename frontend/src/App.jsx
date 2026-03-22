@@ -28,6 +28,10 @@ function App() {
   const [alunoDeletando, setAlunoDeletando] = useState(null)
   const [deletando, setDeletando] = useState(false)
   
+  // Estados para modal de resultado de revalidação
+  const [modalRevalidacaoAberto, setModalRevalidacaoAberto] = useState(false)
+  const [resultadoRevalidacao, setResultadoRevalidacao] = useState(null)
+  
   // Estados de autenticação
   const [autenticado, setAutenticado] = useState(false)
   const [token, setToken] = useState(null)
@@ -96,9 +100,42 @@ function App() {
   const revalidarClasses = async () => {
     try {
       const response = await api.put('/alunos/revalidar-classes')
+      const resultado = response.data.resultado
       
-      toast.success(`Revalidação concluída! ${response.data.resultado.atualizados} aluno(s) atualizado(s)`)
-      carregarDados()
+      // Se houve mudanças, buscar detalhes completos dos alunos
+      if (resultado.atualizados > 0 && resultado.detalhes) {
+        const alunosAlterados = []
+        
+        for (const detalhe of resultado.detalhes) {
+          if (!detalhe.erro) {
+            const classeAnterior = classes.find(c => c.id === detalhe.classe_anterior)
+            const classeNova = classes.find(c => c.id === detalhe.classe_nova)
+            
+            alunosAlterados.push({
+              nome: detalhe.aluno_nome,
+              idade: detalhe.idade,
+              classeAnterior: classeAnterior?.nome || 'N/A',
+              classeNova: classeNova?.nome || 'N/A'
+            })
+          }
+        }
+        
+        setResultadoRevalidacao({
+          total: resultado.total_alunos,
+          atualizados: resultado.atualizados,
+          erros: resultado.erros,
+          alunosAlterados
+        })
+        
+        await carregarDados() // Recarregar dados antes de abrir modal
+        setModalRevalidacaoAberto(true)
+      } else {
+        toast.info('Nenhuma alteração necessária. Todos os alunos já estão nas classes corretas!')
+      }
+      
+      if (resultado.atualizados > 0) {
+        carregarDados()
+      }
     } catch (error) {
       if (error.response?.status === 401) {
         handleLogout()
@@ -106,6 +143,11 @@ function App() {
         toast.error('Erro ao revalidar classes')
       }
     }
+  }
+  
+  const fecharModalRevalidacao = () => {
+    setModalRevalidacaoAberto(false)
+    setResultadoRevalidacao(null)
   }
 
   const abrirModalEdicao = (aluno) => {
@@ -470,6 +512,58 @@ function App() {
                 disabled={deletando}
               >
                 {deletando ? 'Deletando...' : 'Sim, Deletar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal de Resultado de Revalidação */}
+      {modalRevalidacaoAberto && resultadoRevalidacao && (
+        <div className="modal-overlay" onClick={fecharModalRevalidacao}>
+          <div className="modal-content modal-revalidacao" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>✅ Revalidação Concluída</h2>
+            </div>
+            
+            <div className="modal-body">
+              <div className="revalidacao-summary">
+                <p><strong>Total de alunos:</strong> {resultadoRevalidacao.total}</p>
+                <p><strong>Alunos atualizados:</strong> {resultadoRevalidacao.atualizados}</p>
+                {resultadoRevalidacao.erros > 0 && (
+                  <p className="text-error"><strong>Erros:</strong> {resultadoRevalidacao.erros}</p>
+                )}
+              </div>
+              
+              {resultadoRevalidacao.alunosAlterados.length > 0 && (
+                <>
+                  <h3 className="mudancas-title">Alunos que Mudaram de Classe:</h3>
+                  <div className="mudancas-lista">
+                    {resultadoRevalidacao.alunosAlterados.map((aluno, index) => (
+                      <div key={index} className="mudanca-item">
+                        <div className="mudanca-nome">
+                          <span>{aluno.nome}</span>
+                          <span className="mudanca-idade">({aluno.idade} anos)</span>
+                        </div>
+                        <div className="mudanca-classes">
+                          <span className="classe-antiga">{aluno.classeAnterior}</span>
+                          <span className="mudanca-seta">→</span>
+                          <span className="classe-nova">{aluno.classeNova}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <div className="modal-actions">
+              <button 
+                type="button" 
+                onClick={fecharModalRevalidacao} 
+                className="btn btn-primary"
+              >
+                Fechar
               </button>
             </div>
           </div>
