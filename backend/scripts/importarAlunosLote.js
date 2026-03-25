@@ -128,7 +128,22 @@ const alunosEntrada = [
   { nome: 'Wagner Lúcio Oliveira', data: '18/08/1978' },
   { nome: 'Sandra Fernanda de Oliveira', data: '23/08/1982' },
   { nome: 'Vânia Consolação Azevedo Resende', data: '26/08/1964' },
-  { nome: 'Adilson Gomes de Souza', data: '29/08/1971' }
+  { nome: 'Adilson Gomes de Souza', data: '29/08/1971' },
+  { nome: 'Isabel de Jesus Lázaro', data: '01/12/1951' },
+  { nome: 'André Alves Rezende Lázaro', data: '10/12/2009' },
+  { nome: 'Rebeca Alves Rezende Lázaro', data: '10/12/2014' },
+  { nome: 'Eunice Maria Azevedo Diniz', data: '11/12/1963' },
+  { nome: 'Estefane Danielle Cândida Silva Resende', data: '13/12/2000' },
+  { nome: 'Alécio Resende Soares', data: '15/12/1962' },
+  { nome: 'Edilene Júnia Diniz Vieira', data: '16/12/1968' },
+  { nome: 'Rosiléia M. F. Alves Vieira', data: '18/12/1978' },
+  { nome: 'Karley Raquel Mariano de Souza', data: '19/12/1972' },
+  { nome: 'Júlia Azevedo Oliveira', data: '20/12/2010' },
+  { nome: 'João Resende Oliveira', data: '20/12/2022' },
+  { nome: 'Eli Paiva de Resende', data: '21/12/1965' },
+  { nome: 'Antônio Sérvulo de Azevedo', data: '23/12/1967' },
+  { nome: 'Helvécio Soares Resende', data: '26/12/1969' },
+  { nome: 'Ildeci Soares Resende', data: '26/12/1963' }
 ];
 
 function converterData(dataBr) {

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import Login from './Login'
 import api from './config/api'
-import { FaEdit, FaTrash } from 'react-icons/fa'
+import { FaEdit, FaTrash, FaUserTie } from 'react-icons/fa'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -21,6 +21,10 @@ function App() {
   const [salvando, setSalvando] = useState(false)
   const [buscaNome, setBuscaNome] = useState('')
   const [mesAniversario, setMesAniversario] = useState('')
+  const [modalProfessorAberto, setModalProfessorAberto] = useState(false)
+  const [alunoProfessorSelecionado, setAlunoProfessorSelecionado] = useState(null)
+  const [classeProfessorSelecionada, setClasseProfessorSelecionada] = useState('')
+  const [salvandoProfessor, setSalvandoProfessor] = useState(false)
 
   // Estado para filtro por classe
   const [classeSelecionada, setClasseSelecionada] = useState(null)
@@ -230,8 +234,89 @@ function App() {
     }
   }
 
-  const alunosFiltradosPorClasse = classeSelecionada
-    ? alunos.filter(aluno => aluno.classe.id === classeSelecionada.id)
+  const abrirModalProfessor = (aluno) => {
+    const classeAtualProfessor = classes.find(classe =>
+      classe.professores?.some(professor => professor.id === aluno.id)
+    )
+    setAlunoProfessorSelecionado(aluno)
+    setClasseProfessorSelecionada(classeAtualProfessor ? String(classeAtualProfessor.id) : '')
+    setModalProfessorAberto(true)
+  }
+
+  const fecharModalProfessor = () => {
+    setModalProfessorAberto(false)
+    setAlunoProfessorSelecionado(null)
+    setClasseProfessorSelecionada('')
+  }
+
+  const confirmarProfessorDaClasse = async () => {
+    if (!classeProfessorSelecionada) {
+      toast.error('Selecione uma classe para definir o professor')
+      return
+    }
+
+    try {
+      setSalvandoProfessor(true)
+
+      const response = await api.put(`/classes/${classeProfessorSelecionada}/professor`, {
+        professor_id: alunoProfessorSelecionado.id
+      })
+
+      toast.success(response.data?.mensagem || 'Professor definido com sucesso!')
+      await carregarDados()
+      fecharModalProfessor()
+    } catch (error) {
+      if (error.response?.status === 401) {
+        handleLogout()
+      } else {
+        toast.error(`Erro: ${error.response?.data?.erro || 'Erro ao definir professor'}`)
+      }
+    } finally {
+      setSalvandoProfessor(false)
+    }
+  }
+
+  const removerProfessorDaClasse = async () => {
+    if (!alunoProfessorSelecionado) {
+      return
+    }
+
+    const classeAtualProfessor = classes.find(classe =>
+      classe.professores?.some(professor => professor.id === alunoProfessorSelecionado.id)
+    )
+
+    if (!classeAtualProfessor) {
+      toast.info('Este aluno não está como professor em nenhuma classe')
+      return
+    }
+
+    try {
+      setSalvandoProfessor(true)
+
+      const response = await api.delete(
+        `/classes/${classeAtualProfessor.id}/professor/${alunoProfessorSelecionado.id}`
+      )
+
+      toast.success(response.data?.mensagem || 'Professor removido com sucesso!')
+      await carregarDados()
+      fecharModalProfessor()
+    } catch (error) {
+      if (error.response?.status === 401) {
+        handleLogout()
+      } else {
+        toast.error(`Erro: ${error.response?.data?.erro || 'Erro ao remover professor'}`)
+      }
+    } finally {
+      setSalvandoProfessor(false)
+    }
+  }
+
+  const classeSelecionadaAtual = classeSelecionada
+    ? classes.find(classe => classe.id === classeSelecionada.id) || classeSelecionada
+    : null
+
+  const alunosFiltradosPorClasse = classeSelecionadaAtual
+    ? alunos.filter(aluno => aluno.classe.id === classeSelecionadaAtual.id)
     : alunos
 
   const termoBusca = buscaNome.trim().toLowerCase()
@@ -248,6 +333,28 @@ function App() {
       return mesNascimento === mesAniversario
     })
     : alunosFiltradosPorNome
+
+  const professorIds = new Set(
+    classes.flatMap(classe => (classe.professores || []).map(professor => professor.id))
+  )
+
+  const classesProfessorPorAluno = classes.reduce((acumulador, classe) => {
+    (classe.professores || []).forEach((professor) => {
+      if (!acumulador[professor.id]) {
+        acumulador[professor.id] = []
+      }
+
+      acumulador[professor.id].push(classe.nome)
+    })
+
+    return acumulador
+  }, {})
+
+  const classeProfessorAtualDoAluno = alunoProfessorSelecionado
+    ? classes.find(classe =>
+      classe.professores?.some(professor => professor.id === alunoProfessorSelecionado.id)
+    )
+    : null
 
   const meses = [
     { valor: '01', label: 'Janeiro' },
@@ -423,8 +530,8 @@ function App() {
         <section className="classes-section">
           <h2>Classes Disponíveis</h2>
           <p className="classes-subtitle">
-            {classeSelecionada
-              ? `Filtrando por: ${classeSelecionada.nome} - Clique novamente para mostrar todos`
+            {classeSelecionadaAtual
+              ? `Filtrando por: ${classeSelecionadaAtual.nome} - Clique novamente para mostrar todos`
               : 'Clique em uma classe para filtrar os alunos'}
           </p>
           <div className="classes-grid">
@@ -447,7 +554,7 @@ function App() {
                   style={{ cursor: 'pointer' }}
                 >
                   <h3>{classe.nome}</h3>
-                  <p>{faixaEtaria}</p>
+                  <p>{faixaEtaria}</p>           
                   <span className="alunos-count">{alunosNaClasse} aluno(s)</span>
                 </div>
               );
@@ -458,12 +565,12 @@ function App() {
         <section className="alunos-section">
           <div className="section-header">
             <h2>
-              {classeSelecionada
-                ? `Alunos da Classe ${classeSelecionada.nome} (${alunosFiltrados.length})`
+              {classeSelecionadaAtual
+                ? `Alunos da Classe ${classeSelecionadaAtual.nome} (${alunosFiltrados.length})`
                 : `Alunos Cadastrados (${alunosFiltrados.length})`}
             </h2>
             <div className="header-actions">
-              {classeSelecionada && (
+              {classeSelecionadaAtual && (
                 <button
                   onClick={() => setClasseSelecionada(null)}
                   className="btn btn-limpar"
@@ -476,6 +583,14 @@ function App() {
               </button>
             </div>
           </div>
+
+          {classeSelecionadaAtual && (
+            <p className="professor-da-classe">
+              Professores da classe: <strong>{classeSelecionadaAtual.professores?.length
+                ? classeSelecionadaAtual.professores.map(professor => professor.nome).join(', ')
+                : 'Não definido'}</strong>
+            </p>
+          )}
 
           <div className="table-filters">
             <input
@@ -499,14 +614,16 @@ function App() {
             </select>
           </div>
 
+          <p className="professor-legend">🟨 Linha amarela = professor</p>
+
           {alunosFiltrados.length === 0 ? (
             <p className="empty-message">
               {buscaNome.trim()
                 ? `Nenhum aluno encontrado para "${buscaNome.trim()}".`
                 : mesAniversario
                   ? 'Nenhum aluno encontrado para o mês selecionado.'
-                  : classeSelecionada
-                    ? `Nenhum aluno cadastrado na classe ${classeSelecionada.nome}.`
+                : classeSelecionadaAtual
+                  ? `Nenhum aluno cadastrado na classe ${classeSelecionadaAtual.nome}.`
                     : 'Nenhum aluno cadastrado ainda.'}
             </p>
           ) : (
@@ -530,8 +647,18 @@ function App() {
                     }
 
                     return (
-                      <tr key={aluno.id}>
-                        <td>{aluno.nome || 'N/A'}</td>
+                      <tr
+                        key={aluno.id}
+                        className={professorIds.has(aluno.id) ? 'aluno-professor-row' : ''}
+                      >
+                        <td>
+                          <div>{aluno.nome || 'N/A'}</div>
+                          {professorIds.has(aluno.id) && (
+                            <small className="professor-classes-info">
+                              Professor da(s) classe(s): {classesProfessorPorAluno[aluno.id]?.join(', ')}
+                            </small>
+                          )}
+                        </td>
                         <td className="data-nascimento-col">{dataFormatada}</td>
                         <td>{aluno.idade !== undefined ? `${aluno.idade} anos` : 'N/A'}</td>
                         <td>
@@ -541,6 +668,13 @@ function App() {
                         </td>
                         <td>
                           <div className="action-buttons">
+                            <button
+                              onClick={() => abrirModalProfessor(aluno)}
+                              className="btn-action btn-professor"
+                              title="Definir aluno como professor"
+                            >
+                              <FaUserTie />
+                            </button>
                             <button
                               onClick={() => abrirModalEdicao(aluno)}
                               className="btn-action btn-edit"
@@ -608,6 +742,72 @@ function App() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Definição de Professor */}
+      {modalProfessorAberto && alunoProfessorSelecionado && (
+        <div className="modal-overlay" onClick={fecharModalProfessor}>
+          <div className="modal-content modal-professor" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Definir Professor da Classe</h2>
+              <button className="btn-close" onClick={fecharModalProfessor}>✕</button>
+            </div>
+
+            <div className="modal-body">
+              <p className="delete-warning">
+                Aluno selecionado: <strong>{alunoProfessorSelecionado.nome}</strong>
+              </p>
+
+              <p className="professor-atual-info">
+                Classe atual como professor: <strong>{classeProfessorAtualDoAluno?.nome || 'Nenhuma'}</strong>
+              </p>
+
+              <div className="form-group">
+                <label htmlFor="classeProfessor">Selecione a classe:</label>
+                <select
+                  id="classeProfessor"
+                  value={classeProfessorSelecionada}
+                  onChange={(e) => setClasseProfessorSelecionada(e.target.value)}
+                  disabled={salvandoProfessor}
+                >
+                  <option value="">Selecione uma classe</option>
+                  {classes.map(classe => (
+                    <option key={classe.id} value={classe.id}>
+                      {classe.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="modal-actions">
+              <button
+                type="button"
+                onClick={fecharModalProfessor}
+                className="btn btn-secondary"
+                disabled={salvandoProfessor}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={removerProfessorDaClasse}
+                className="btn btn-danger"
+                disabled={salvandoProfessor || !classeProfessorAtualDoAluno}
+              >
+                Remover Professor
+              </button>
+              <button
+                type="button"
+                onClick={confirmarProfessorDaClasse}
+                className="btn btn-primary"
+                disabled={salvandoProfessor}
+              >
+                {salvandoProfessor ? 'Salvando...' : 'Salvar Professor'}
+              </button>
+            </div>
           </div>
         </div>
       )}

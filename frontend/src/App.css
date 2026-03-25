@@ -265,6 +265,12 @@ h2 {
   opacity: 0.9;
 }
 
+.professor-info {
+  margin-top: 0.5rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+}
+
 .alunos-count {
   display: block;
   margin-top: 0.75rem;
@@ -313,6 +319,11 @@ h2 {
   gap: 0.75rem;
   flex-wrap: wrap;
   margin-bottom: 1rem;
+}
+
+.professor-da-classe {
+  margin-bottom: 1rem;
+  color: #333;
 }
 
 .search-input {
@@ -402,6 +413,34 @@ tbody tr:hover {
   background: #f8f9fa;
 }
 
+tbody tr.aluno-professor-row {
+  background: #fff9db;
+}
+
+tbody tr.aluno-professor-row:hover {
+  background: #fff3bf;
+}
+
+.professor-legend {
+  margin-bottom: 0.8rem;
+  color: #8a6d00;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.professor-classes-info {
+  display: block;
+  margin-top: 0.25rem;
+  color: #8a6d00;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.professor-atual-info {
+  margin-bottom: 1rem;
+  color: #444;
+}
+
 .classe-badge {
   display: inline-block;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -463,6 +502,15 @@ tbody tr:hover {
 
 .btn-delete:hover {
   background: rgba(231, 76, 60, 0.1);
+  transform: scale(1.1);
+}
+
+.btn-professor {
+  color: #27ae60;
+}
+
+.btn-professor:hover {
+  background: rgba(39, 174, 96, 0.12);
   transform: scale(1.1);
 }
 
@@ -551,6 +599,22 @@ tbody tr:hover {
 
 .modal-form {
   margin-top: 1rem;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  background-color: white;
+  color: #333;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #667eea;
 }
 
 .modal-actions {
